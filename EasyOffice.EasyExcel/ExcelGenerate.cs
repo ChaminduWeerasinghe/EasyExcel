@@ -4,7 +4,7 @@ using NPOI.XSSF.UserModel;
 
 namespace EasyOffice.EasyExcel;
 
-public class ExcelGenerate<TObj> where TObj : class
+public sealed class ExcelGenerate<TObj> where TObj : class
 {
     
     /// <summary>
@@ -114,7 +114,7 @@ public class ExcelGenerate<TObj> where TObj : class
     }
 }
 
-public class ExportOption
+public sealed class ExportOption
 {
     private XSSFWorkbook WorkBook { get; set; }
 
@@ -129,7 +129,7 @@ public class ExportOption
     /// <param name="fileName">Name of the file</param>
     /// <param name="directoryPath">Directory where excel file need to save </param>
     /// <returns>File path of the saved excel file</returns>
-    public string ExportIntoFileLocation(string fileName,string directoryPath)
+    public string ExportIntoDirectory(string fileName,string directoryPath)
     {
         if (!Directory.Exists(directoryPath))
             Directory.CreateDirectory(directoryPath);
@@ -159,17 +159,17 @@ public class ExportOption
     
     private static string GetFileName(string fileName)
     {
-        if(fileName.Contains(ExcelExportConst.Extension))
+        if(fileName.Contains(ExportConst.Extension))
             return fileName;
         
-        return fileName.Replace(".xls", "")+ ExcelExportConst.Extension;
+        return fileName.Replace(".xls", "")+ ExportConst.Extension;
         
     }
     
 }
 
 
-public class HeaderName: Attribute
+public sealed class HeaderName: Attribute
 {
     public string Name { get; }
 
@@ -181,7 +181,7 @@ public class HeaderName: Attribute
 }
 
 
-public class ExcelExportConst
+public sealed class ExportConst
 {
     public const string Extension = ".xlsx";
     public const string ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";

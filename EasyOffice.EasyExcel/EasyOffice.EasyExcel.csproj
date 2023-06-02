@@ -4,10 +4,30 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>EasyExcel</Title>
+        <Authors>Chamindu Weerasinghe</Authors>
+        <Description>Nuget package which can do simple excel services</Description>
+        <PackageIcon>easyexcel-logo.png</PackageIcon>
+        <RepositoryUrl>https://github.com/ChaminduWeerasinghe/EasyExcel</RepositoryUrl>
+        <PackageTags>Excel</PackageTags>
+        <RepositoryType>Git</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="NPOI" Version="2.6.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="easyexcel-logo.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
 
 </Project>
