@@ -1,8 +1,8 @@
-﻿namespace EasyOffice.EasyExcel;
+﻿namespace EasyOffice.EasyExcel.Models;
 
-public class FileGenerateModel
+public class FileExportModel
 {
-    public FileGenerateModel(string fileName)
+    public FileExportModel(string fileName)
     {
         FileName = fileName;
         Stream = new MemoryStream();

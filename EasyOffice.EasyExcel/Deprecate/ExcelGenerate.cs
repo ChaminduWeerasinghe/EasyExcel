@@ -1,9 +1,11 @@
 ﻿using System.Reflection;
+using EasyOffice.EasyExcel.Attributes;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
-namespace EasyOffice.EasyExcel;
+namespace EasyOffice.EasyExcel.Deprecate;
 
+[Obsolete("ExcelGenerate<TObj> is deprecated, please use ExcelExport<TObj> instead.")]
 public sealed class ExcelGenerate<TObj> where TObj : class
 {
     
@@ -112,79 +114,4 @@ public sealed class ExcelGenerate<TObj> where TObj : class
             return CellType.Numeric;
         return propertyInfo.PropertyType == typeof(bool) ? CellType.Boolean : CellType.String;
     }
-}
-
-public sealed class ExportOption
-{
-    private XSSFWorkbook WorkBook { get; set; }
-
-    public ExportOption(XSSFWorkbook workBook)
-    {
-        WorkBook = workBook;
-    }
-    
-    /// <summary>
-    /// Save Excel File in Specified Location and Returns File Path
-    /// </summary>
-    /// <param name="fileName">Name of the file</param>
-    /// <param name="directoryPath">Directory where excel file need to save </param>
-    /// <returns>File path of the saved excel file</returns>
-    public string ExportIntoDirectory(string fileName,string directoryPath)
-    {
-        if (!Directory.Exists(directoryPath))
-            Directory.CreateDirectory(directoryPath);
-        
-        var filePath = Path.Combine(directoryPath, GetFileName(fileName));
-        
-        var file = new FileStream(filePath, FileMode.Create, FileAccess.Write);
-        WorkBook.Write(file);
-        file.Close();
-
-        return filePath;
-    }
-    
-    /// <summary>
-    /// Write Excel File into MemoryStream
-    /// </summary>
-    /// <param name="fileName">Name of the file</param>
-    /// <returns>Instance of FileGenerateModel</returns>
-    public FileGenerateModel ExportAsStream(string fileName)
-    {
-        var fileGenerateModel = new FileGenerateModel(fileName);
-        
-        WorkBook.Write(fileGenerateModel.Stream);
-
-        return fileGenerateModel;
-    }
-    
-    private static string GetFileName(string fileName)
-    {
-        if(fileName.Contains(ExportConst.Extension))
-            return fileName;
-        
-        return fileName.Replace(".xls", "")+ ExportConst.Extension;
-        
-    }
-    
-}
-
-
-public sealed class HeaderName: Attribute
-{
-    public string Name { get; }
-
-    public HeaderName(string name)
-    {
-        Name = name;
-    }
-    
-}
-
-
-public sealed class ExportConst
-{
-    public const string Extension = ".xlsx";
-    public const string ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    public const string ExcelFileName = "ExcelFileName";
-    public const string ExcelFilePath = "Workbooks";
 }

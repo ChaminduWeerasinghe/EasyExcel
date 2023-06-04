@@ -51,7 +51,7 @@ FileGenerateModel model = ExcelGenerat<TObject>.GenerateExcel("SheetName",new Li
 [HttpPost("excel-export"), DisableRequestSizeLimit]
 public IActionResult ExportExcel()
 {
-    FileGenerateModel model = ExcelGenerat<TObject>.GenerateExcel("SheetName",new List<TObject>())
+    FileGenerateModel model = ExcelGenerate<TObject>.GenerateExcel("SheetName",new List<TObject>())
             .ExportAsStream("FileName");
     return File(model.Stream.ToArray(),ExportConst.ContentType, model.FileName);
 }
