@@ -13,6 +13,7 @@
         <PackageTags>Excel</PackageTags>
         <RepositoryType>Git</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Version>1.2.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

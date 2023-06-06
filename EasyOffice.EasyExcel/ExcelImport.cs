@@ -2,7 +2,6 @@
 using EasyOffice.EasyExcel.Attributes;
 using EasyOffice.EasyExcel.Exceptions;
 using EasyOffice.EasyExcel.Models;
-using Microsoft.AspNetCore.Http;
 using NPOI.SS.UserModel;
 
 namespace EasyOffice.EasyExcel;
@@ -10,20 +9,38 @@ namespace EasyOffice.EasyExcel;
 public sealed class ExcelImport<TObj> where TObj : class
 {
 
-    public static List<TObj> ReadExcel(FileImportModel file,string sheetName)
+    // public static List<TObj> ReadReadFromFormFile(FileImportModel fileImportModel,string sheetName)
+    // {
+    //     var workBook = WorkbookAccessor.GetWorkBookFromFile(fileImportModel.FormFile);
+    //     return RetrieveExcelData(workBook, sheetName);
+    // }
+    //
+    // public static List<TObj> ReadExcel(string filePath,string sheetName)
+    // {
+    //     var workBook = WorkbookAccessor.GetWorkBookByFilePath(filePath);
+    //     return RetrieveExcelData(workBook, sheetName);
+    // }
+    //
+    // public static List<TObj> ReadFromFileStream(FileImportModel fileImportModel,string sheetName)
+    // {
+    //     var workBook = WorkbookAccessor.GetWorkBookFromStream(fileImportModel.FileStream);
+    //     return RetrieveExcelData(workBook, sheetName);
+    // }
+    
+    public static List<TObj> ReadExcel(FileImportModel fileImportModel,string sheetName)
     {
-        var workBook = WorkbookAccessor.GetWorkBookByFile(file.File);
-        return RetrieveExcelData(workBook, sheetName);
+        return RetrieveExcelData(fileImportModel.Workbook, sheetName);
     }
-
+    
     public static List<TObj> ReadExcel(string filePath,string sheetName)
     {
-        var workBook = WorkbookAccessor.GetWorkBookByFilePath(filePath);
+        var workBook = GetWorkBookByFilePath(filePath);
         return RetrieveExcelData(workBook, sheetName);
     }
 
     private static List<TObj> RetrieveExcelData(IWorkbook workbook, string sheetName)
     {
+        
         var sheet = workbook.GetSheet(sheetName);
         var rows = sheet.GetRowEnumerator();
         var mapping = new Dictionary<int, PropertyInfo>();
@@ -31,9 +48,16 @@ public sealed class ExcelImport<TObj> where TObj : class
 
         while (rows.MoveNext())
         {
-            if (rows.Current is null) continue;
+            IRow curRow;
+            try
+            {
+                curRow = (IRow)rows.Current!;
+            }
+            catch (Exception)
+            {
+                continue;
+            }
             
-            var curRow = (IRow)rows.Current;
 
             if (mapping.Count > 0)
             {
@@ -44,20 +68,27 @@ public sealed class ExcelImport<TObj> where TObj : class
                     if (!mapping.TryGetValue(cell.ColumnIndex, out var propertyInfo)) continue;
 
                     var cellValue = cell.ToString();
-
-                    var value = Convert.ChangeType(cellValue ?? default, propertyInfo.PropertyType);
-
-                    propertyInfo.SetValue(insertObject,value );
+                    
+                    var value = ValueConverter(propertyInfo,cellValue);
+                    
+                    propertyInfo.SetValue(insertObject,value);
                 }
                 insertObjectList.Add(insertObject);
             }
-            else if (curRow.Cells.All(x => x.CellType != CellType.Blank))
+            else
             {
                 mapping =  GetRowIndexPropertyInfoMapping(sheet.GetRow(curRow.RowNum));
             }
         }
 
         return insertObjectList;
+    }
+
+
+    private static object? ValueConverter(PropertyInfo propertyInfo,string? cellValue)
+    {
+        var propertyInfoPropertyType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
+        return (cellValue == null) ? null : Convert.ChangeType(cellValue, propertyInfoPropertyType);
     }
 
     private static Dictionary<int, PropertyInfo> GetRowIndexPropertyInfoMapping(IRow row)
@@ -68,7 +99,7 @@ public sealed class ExcelImport<TObj> where TObj : class
         {
             var cellValue = cell.ToString();
 
-            if (cellValue != null)
+            if (!string.IsNullOrWhiteSpace(cellValue))
             {
                 foreach (var property in properties)
                 {
@@ -86,32 +117,7 @@ public sealed class ExcelImport<TObj> where TObj : class
 
         return map;
     }
-}
-
-public sealed class WorkbookAccessor
-{
-    
-    internal static IWorkbook GetWorkBookByFile(IFormFile file)
-    {
-        if (file.Length > 0)
-        {
-            using var memoryStream = new MemoryStream();
-            var task = file.CopyToAsync(memoryStream);
-            task.Wait();
-
-            try
-            {
-                return WorkbookFactory.Create(memoryStream);
-            }
-            catch (Exception)
-            {
-                throw new ExcelFileNotFoundException("Excel file contained in file");
-            }
-        }
-        throw new ExcelFileNotFoundException("No data contained in file");
-    }
-    
-    internal static IWorkbook GetWorkBookByFilePath(string filePath)
+    private static IWorkbook GetWorkBookByFilePath(string filePath)
     {
         if (!File.Exists(filePath))
             throw new ExcelFileNotFoundException("Excel file not found in provided path");
@@ -122,5 +128,6 @@ public sealed class WorkbookAccessor
         return WorkbookFactory.Create(new MemoryStream(byteArray));
     }
 }
+
 
 
