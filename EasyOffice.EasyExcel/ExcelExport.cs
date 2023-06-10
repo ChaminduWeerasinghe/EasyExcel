@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using EasyOffice.EasyExcel.Attributes;
+using EasyOffice.EasyExcel.Exceptions;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
@@ -102,7 +103,10 @@ public sealed class ExcelExport<TObj> where TObj : class
     /// <returns>Dictionary which have property name and annotation</returns>
     private static Dictionary<string,string> GetPropertyNamesAndAnnotationsByClass(Type type)
     {
-        return type.GetProperties().ToDictionary(propertyInfo => propertyInfo.Name, propertyInfo => 
+        var properties = type.GetProperties();
+        if (properties.Length == 0)
+            throw new PropertyInaccessibleException($"No properties found or properties are inaccessible in the provided class ({nameof(type)})");
+        return properties.ToDictionary(propertyInfo => propertyInfo.Name, propertyInfo => 
             propertyInfo.GetCustomAttribute<HeaderName>()?.Name ?? propertyInfo.Name);
     }
 

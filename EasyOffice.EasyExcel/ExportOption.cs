@@ -39,9 +39,9 @@ public sealed class ExportOption
     /// </summary>
     /// <param name="fileName">Name of the file</param>
     /// <returns>Instance of FileExportModel</returns>
-    public FileExportModel ExportIntoStream(string fileName)
+    public ExportData ExportIntoStream(string fileName)
     {
-        var fileGenerateModel = new FileExportModel(fileName);
+        var fileGenerateModel = new ExportData(fileName);
         
         WorkBook.Write(fileGenerateModel.Stream);
 
@@ -50,10 +50,10 @@ public sealed class ExportOption
     
     private static string GetFileName(string fileName)
     {
-        if(fileName.Contains(ApplicationConstant.Extension))
+        if(fileName.Contains(ExcelConstant.SupportingExtension))
             return fileName;
         
-        return fileName.Replace(".xls", "")+ ApplicationConstant.Extension;
+        return fileName.Replace(".xls", "")+ ExcelConstant.SupportingExtension;
     }
 
     #region To be deprecated

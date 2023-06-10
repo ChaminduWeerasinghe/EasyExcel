@@ -1,41 +1,18 @@
 ﻿using System.Reflection;
 using EasyOffice.EasyExcel.Attributes;
 using EasyOffice.EasyExcel.Exceptions;
-using EasyOffice.EasyExcel.Models;
 using NPOI.SS.UserModel;
+using ImportOption = EasyOffice.EasyExcel.Models.ImportOption;
 
 namespace EasyOffice.EasyExcel;
 
 public sealed class ExcelImport<TObj> where TObj : class
 {
 
-    // public static List<TObj> ReadReadFromFormFile(FileImportModel fileImportModel,string sheetName)
-    // {
-    //     var workBook = WorkbookAccessor.GetWorkBookFromFile(fileImportModel.FormFile);
-    //     return RetrieveExcelData(workBook, sheetName);
-    // }
-    //
-    // public static List<TObj> ReadExcel(string filePath,string sheetName)
-    // {
-    //     var workBook = WorkbookAccessor.GetWorkBookByFilePath(filePath);
-    //     return RetrieveExcelData(workBook, sheetName);
-    // }
-    //
-    // public static List<TObj> ReadFromFileStream(FileImportModel fileImportModel,string sheetName)
-    // {
-    //     var workBook = WorkbookAccessor.GetWorkBookFromStream(fileImportModel.FileStream);
-    //     return RetrieveExcelData(workBook, sheetName);
-    // }
     
-    public static List<TObj> ReadExcel(FileImportModel fileImportModel,string sheetName)
+    public static List<TObj> ReadExcel(ImportOption importOption,string sheetName)
     {
-        return RetrieveExcelData(fileImportModel.Workbook, sheetName);
-    }
-    
-    public static List<TObj> ReadExcel(string filePath,string sheetName)
-    {
-        var workBook = GetWorkBookByFilePath(filePath);
-        return RetrieveExcelData(workBook, sheetName);
+        return RetrieveExcelData(importOption.Workbook, sheetName);
     }
 
     private static List<TObj> RetrieveExcelData(IWorkbook workbook, string sheetName)
@@ -58,20 +35,17 @@ public sealed class ExcelImport<TObj> where TObj : class
                 continue;
             }
             
-
             if (mapping.Count > 0)
             {
                 var insertObject = Activator.CreateInstance<TObj>();
-                foreach (var cell in curRow.Cells)
+                foreach (var cell in curRow.Cells.Where(cell => cell.CellType is not CellType.Blank))
                 {
-                    if (cell.CellType is CellType.Blank) continue;
                     if (!mapping.TryGetValue(cell.ColumnIndex, out var propertyInfo)) continue;
 
                     var cellValue = cell.ToString();
                     
                     var value = ValueConverter(propertyInfo,cellValue);
-                    
-                    propertyInfo.SetValue(insertObject,value);
+                    SetValueForProperty(propertyInfo,insertObject,value);
                 }
                 insertObjectList.Add(insertObject);
             }
@@ -84,11 +58,22 @@ public sealed class ExcelImport<TObj> where TObj : class
         return insertObjectList;
     }
 
+    private static void SetValueForProperty(PropertyInfo propertyInfo, TObj insertObject, object? value)
+    {
+        try
+        {
+            propertyInfo.SetValue(insertObject,value);
+        }
+        catch (ArgumentException e)
+        {
+            throw new PropertyInaccessibleException($"Error while setting value to property {propertyInfo.Name} in {typeof(TObj).Name}",e);
+        }
+    }
 
     private static object? ValueConverter(PropertyInfo propertyInfo,string? cellValue)
     {
         var propertyInfoPropertyType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
-        return (cellValue == null) ? null : Convert.ChangeType(cellValue, propertyInfoPropertyType);
+        return string.IsNullOrWhiteSpace(cellValue) ? null : Convert.ChangeType(cellValue, propertyInfoPropertyType);
     }
 
     private static Dictionary<int, PropertyInfo> GetRowIndexPropertyInfoMapping(IRow row)
@@ -116,16 +101,6 @@ public sealed class ExcelImport<TObj> where TObj : class
         }
 
         return map;
-    }
-    private static IWorkbook GetWorkBookByFilePath(string filePath)
-    {
-        if (!File.Exists(filePath))
-            throw new ExcelFileNotFoundException("Excel file not found in provided path");
-        
-        var task = File.ReadAllBytesAsync(filePath);
-        task.Wait();
-        var byteArray = task.Result;
-        return WorkbookFactory.Create(new MemoryStream(byteArray));
     }
 }
 

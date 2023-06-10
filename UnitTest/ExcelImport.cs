@@ -15,7 +15,7 @@ public class ExcelImport
         var filePath = Path.Combine(directoryPath, "FileName.xlsx");
         var file = File.OpenRead(filePath);
        
-        var res = ExcelImport<TImport>.ReadExcel(new FileImportModel(file),"SheetName");
+        var res = ExcelImport<TImport>.ReadExcel(ImportOption.ImportFrom(file),"SheetName");
         file.Close();
         // Assert.NotEmpty(res);
     }
@@ -27,7 +27,7 @@ public class ExcelImport
         var filePath = Path.Combine(directoryPath, "FileName.xlsx");
         var file = File.OpenRead(filePath);
         file.Close();
-        var res = ExcelImport<TImport>.ReadExcel(new FileImportModel(file),"SheetName");
+        var res = ExcelImport<TImport>.ReadExcel(ImportOption.ImportFrom(file),"SheetName");
         Assert.NotNull(res);
     }
 }
