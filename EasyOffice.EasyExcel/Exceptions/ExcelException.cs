@@ -23,3 +23,9 @@ public class InvalidFileTypeException : Exception
     public InvalidFileTypeException(string message) : base(message) { }
     public InvalidFileTypeException(string message, Exception inner) : base(message,inner) { }
 }
+
+public class InvalidValueException : Exception
+{
+    public InvalidValueException(string message) : base(message) { }
+    public InvalidValueException(string message, Exception inner) : base(message,inner) { }
+}

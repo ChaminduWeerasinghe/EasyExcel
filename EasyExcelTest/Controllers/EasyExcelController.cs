@@ -38,7 +38,7 @@ public class EasyExcelController  : ControllerBase
     public ActionResult ExportExcel()
     {
         // var fileGenerateModel = ExcelExport<TestObject>.GenerateExcel("SheetName", _summaries).ExportAsStream("FileName");
-        var fileGenerateModel = ExcelExport<TestObject2>.GenerateExcel("SheetName", _summaries2).ExportAsStream("FileName");
+        var fileGenerateModel = ExcelExport<TestObject2>.GenerateExcel("SheetName", _summaries2).ExportAsStream("Test");
         return File(fileGenerateModel.Stream.ToArray(), ExcelConstant.ContentType, fileGenerateModel.FileName);
     }
     
@@ -46,24 +46,45 @@ public class EasyExcelController  : ControllerBase
     public ActionResult ExportExcelIntoDirectory()
     {
         // var fileGenerateModel = ExcelExport<TestObject>.GenerateExcel("SheetName", _summaries).ExportIntoDirectory("FileName",_fileSaveDir);
-        var fileGenerateModel = ExcelExport<TestObject2>.GenerateExcel("SheetName", _summaries2).ExportIntoDirectory("FileName",_fileSaveDir);
+        var fileGenerateModel = ExcelExport<TestObject2>.GenerateExcel("SheetName", _summaries2).ExportIntoDirectory("Test",_fileSaveDir);
         return Ok(fileGenerateModel);
     }
     
-    [HttpPost("import/from-file")]
+    [HttpPost("import/throw/from-file")]
     public ActionResult ImportExcel(IFormFile file)
     {
         // var fileGenerateModel = ExcelImport<TestObject>.ReadExcel(ImportOption.ImportFrom(file), "SheetName");
-        var fileGenerateModel = ExcelImport<TestObject2>.ReadExcel(ImportOption.ImportFrom(file), "SheetName");
+        // var fileGenerateModel = ExcelImport<TestObject2>.ReadExcel(ImportOption.ImportFrom(file), "SheetName");
+        var fileGenerateModel = ExcelImport<TestObject3>.ReadExcel(ImportOption.ImportFrom(file), "SheetName");
         return Ok(fileGenerateModel);
     }
     
-    [HttpPost("import/from-directory")]
+    [HttpPost("import/throw/from-directory")]
     public ActionResult ImportExcelFromDirectory()
     {
-        var filePath = Path.Join(_fileSaveDir, "FileName.xlsx");
+        var filePath = Path.Join(_fileSaveDir, "Test.xlsx");
         // var fileGenerateModel = ExcelImport<TestObject>.ReadExcel(ImportOption.ImportFrom(filePath), "SheetName");
-        var fileGenerateModel = ExcelImport<TestObject2>.ReadExcel(ImportOption.ImportFrom(filePath), "SheetName");
+        // var fileGenerateModel = ExcelImport<TestObject2>.ReadExcel(ImportOption.ImportFrom(filePath), "SheetName");
+        var fileGenerateModel = ExcelImport<TestObject3>.ReadExcel(ImportOption.ImportFrom(filePath), "SheetName");
+        return Ok(fileGenerateModel);
+    }
+    
+    [HttpPost("import/default/from-file")]
+    public ActionResult ImportExcelOrDefault(IFormFile file)
+    {
+        // var fileGenerateModel = ExcelImport<TestObject>.ReadExcel(ImportOption.ImportFrom(file), "SheetName");
+        // var fileGenerateModel = ExcelImport<TestObject2>.ReadExcel(ImportOption.ImportFrom(file), "SheetName");
+        var fileGenerateModel = ExcelImport<TestObject3>.ReadExcelOrDefault(ImportOption.ImportFrom(file), "SheetName");
+        return Ok(fileGenerateModel);
+    }
+    
+    [HttpPost("import/default/from-directory")]
+    public ActionResult ImportExcelOrDefaultFromDirectory()
+    {
+        var filePath = Path.Join(_fileSaveDir, "Test.xlsx");
+        // var fileGenerateModel = ExcelImport<TestObject>.ReadExcel(ImportOption.ImportFrom(filePath), "SheetName");
+        // var fileGenerateModel = ExcelImport<TestObject2>.ReadExcel(ImportOption.ImportFrom(filePath), "SheetName");
+        var fileGenerateModel = ExcelImport<TestObject3>.ReadExcelOrDefault(ImportOption.ImportFrom(filePath), "SheetName");
         return Ok(fileGenerateModel);
     }
 }
@@ -95,3 +116,9 @@ internal class TestObject2
     [HeaderName("Count")] public int? Column4 { get; set;}
 }
 
+internal class TestObject3
+{
+    [HeaderName("Id")] public int Column1 { get; set;}
+    public string Name { get; set; } = null!;
+    public bool Valid { get; set;}
+}

@@ -8,14 +8,15 @@ namespace EasyOffice.EasyExcel;
 
 public sealed class ExcelImport<TObj> where TObj : class
 {
-
     
-    public static List<TObj> ReadExcel(ImportOption importOption,string sheetName)
-    {
-        return RetrieveExcelData(importOption.Workbook, sheetName);
-    }
+    public static List<TObj> ReadExcel(ImportOption importOption,string sheetName) 
+        => RetrieveExcelData(importOption.Workbook, sheetName,true);
+    
+    public static List<TObj> ReadExcelOrDefault(ImportOption importOption,string sheetName) 
+        => RetrieveExcelData(importOption.Workbook, sheetName);
+    
 
-    private static List<TObj> RetrieveExcelData(IWorkbook workbook, string sheetName)
+    private static List<TObj> RetrieveExcelData(IWorkbook workbook, string sheetName, bool isThrowOnInvalidData = false)
     {
         
         var sheet = workbook.GetSheet(sheetName);
@@ -43,8 +44,9 @@ public sealed class ExcelImport<TObj> where TObj : class
                     if (!mapping.TryGetValue(cell.ColumnIndex, out var propertyInfo)) continue;
 
                     var cellValue = cell.ToString();
+
+                    var value = ConvertValue(propertyInfo, cellValue, cell.Address.FormatAsString(),isThrowOnInvalidData);
                     
-                    var value = ValueConverter(propertyInfo,cellValue);
                     SetValueForProperty(propertyInfo,insertObject,value);
                 }
                 insertObjectList.Add(insertObject);
@@ -69,13 +71,7 @@ public sealed class ExcelImport<TObj> where TObj : class
             throw new PropertyInaccessibleException($"Error while setting value to property {propertyInfo.Name} in {typeof(TObj).Name}",e);
         }
     }
-
-    private static object? ValueConverter(PropertyInfo propertyInfo,string? cellValue)
-    {
-        var propertyInfoPropertyType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
-        return string.IsNullOrWhiteSpace(cellValue) ? null : Convert.ChangeType(cellValue, propertyInfoPropertyType);
-    }
-
+    
     private static Dictionary<int, PropertyInfo> GetRowIndexPropertyInfoMapping(IRow row)
     {
         var map = new Dictionary<int, PropertyInfo>();
@@ -102,7 +98,16 @@ public sealed class ExcelImport<TObj> where TObj : class
 
         return map;
     }
+    
+
+    private static object? ConvertValue(PropertyInfo propertyInfo, string? cellValue, string cellName, bool isThrowOnInvalidData)
+    {
+        var propertyType = Nullable.GetUnderlyingType(propertyInfo.PropertyType);
+        
+        if(isThrowOnInvalidData && propertyType is null && string.IsNullOrWhiteSpace(cellValue))
+            throw new InvalidValueException($"Value of property '{propertyInfo.Name}' in '{typeof(TObj)}' cannot be null (Cell Address : {cellName})");
+        
+        var propertyInfoPropertyType = propertyType ?? propertyInfo.PropertyType;
+        return string.IsNullOrWhiteSpace(cellValue) ? null : Convert.ChangeType(cellValue, propertyInfoPropertyType);
+    }
 }
-
-
-
