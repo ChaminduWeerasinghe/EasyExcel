@@ -6,9 +6,7 @@ Basic Excel Export and Import Library for .NET Core 7.0+ using NPOI Library.
 
 ## Usage
 
->Model is used for export and import data from excel. Maintain property names as same as excel 
- column name or use **HeaderName** attribute for mapping excel column with model property.
-> Make sure to keep properties as public and have getter and setter.
+>Model is used for export and import data from excel. Make sure maintain property names as same as excel header row name or use **HeaderName** attribute for map excel column (Header name) with model property. Keep properties as public and have getter and setter.
 
 ```csharp
 // Model
@@ -20,6 +18,8 @@ public class TObject
 }
 
 ```
+
+&nbsp;
 
 ### Excel Export
 
@@ -63,7 +63,7 @@ public IActionResult ExportExcel()
 ---
 ### Excel Import
 
-By using ImportOption.ImportFrom() method you can import excel data from File Path,IFormFile or Stream.
+By using ImportOption.ImportFrom() method you can import excel data from File-Path, IFormFile or Stream.
 
 ```csharp
 // ImportOption
@@ -86,3 +86,10 @@ List<TObject> data = ExcelImport<TObject>.ReadExcel(ImportOption.ImportFrom(file
 // // ReadExcelInSafe
 List<TObject> data = ExcelImport<TObject>.ReadExcelInSafe(ImportOption.ImportFrom(filePath), "SheetName");
 ```
+
+&nbsp;
+
+&nbsp;
+
+
+Dont forget to give star for this repository.😉
