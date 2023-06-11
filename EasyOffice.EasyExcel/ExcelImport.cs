@@ -8,11 +8,24 @@ namespace EasyOffice.EasyExcel;
 
 public sealed class ExcelImport<TObj> where TObj : class
 {
-    
+    /// <summary>
+    /// Read xlsx file and map data to List of TObject. Throws exception when try to map nullable value to not nullable property
+    /// </summary>
+    /// <param name="importOption"></param>
+    /// <param name="sheetName"></param>
+    /// <exception cref="InvalidValueException">When try to map blank value from excel into not nullable property in TObj</exception>
+    /// <returns>List of TObj</returns>
     public static List<TObj> ReadExcel(ImportOption importOption,string sheetName) 
         => RetrieveExcelData(importOption.Workbook, sheetName,true);
     
-    public static List<TObj> ReadExcelOrDefault(ImportOption importOption,string sheetName) 
+    
+    /// <summary>
+    /// Read xlsx file and map data to List of TObject. Set default value when try to map nullable to not nullable property
+    /// </summary>
+    /// <param name="importOption"></param>
+    /// <param name="sheetName"></param>
+    /// <returns>List of TObj</returns>
+    public static List<TObj> ReadExcelInSafe(ImportOption importOption,string sheetName) 
         => RetrieveExcelData(importOption.Workbook, sheetName);
     
 

@@ -39,9 +39,9 @@ public sealed class ExportOption
     /// </summary>
     /// <param name="fileName">Name of the file</param>
     /// <returns>Instance of FileExportModel</returns>
-    public ExportData ExportIntoStream(string fileName)
+    public FileGenerateData ExportIntoStream(string fileName)
     {
-        var fileGenerateModel = new ExportData(fileName);
+        var fileGenerateModel = new FileGenerateData(fileName);
         
         WorkBook.Write(fileGenerateModel.Stream);
 

@@ -74,7 +74,7 @@ public class EasyExcelController  : ControllerBase
     {
         // var fileGenerateModel = ExcelImport<TestObject>.ReadExcel(ImportOption.ImportFrom(file), "SheetName");
         // var fileGenerateModel = ExcelImport<TestObject2>.ReadExcel(ImportOption.ImportFrom(file), "SheetName");
-        var fileGenerateModel = ExcelImport<TestObject3>.ReadExcelOrDefault(ImportOption.ImportFrom(file), "SheetName");
+        var fileGenerateModel = ExcelImport<TestObject3>.ReadExcelInSafe(ImportOption.ImportFrom(file), "SheetName");
         return Ok(fileGenerateModel);
     }
     
@@ -84,7 +84,7 @@ public class EasyExcelController  : ControllerBase
         var filePath = Path.Join(_fileSaveDir, "Test.xlsx");
         // var fileGenerateModel = ExcelImport<TestObject>.ReadExcel(ImportOption.ImportFrom(filePath), "SheetName");
         // var fileGenerateModel = ExcelImport<TestObject2>.ReadExcel(ImportOption.ImportFrom(filePath), "SheetName");
-        var fileGenerateModel = ExcelImport<TestObject3>.ReadExcelOrDefault(ImportOption.ImportFrom(filePath), "SheetName");
+        var fileGenerateModel = ExcelImport<TestObject3>.ReadExcelInSafe(ImportOption.ImportFrom(filePath), "SheetName");
         return Ok(fileGenerateModel);
     }
 }

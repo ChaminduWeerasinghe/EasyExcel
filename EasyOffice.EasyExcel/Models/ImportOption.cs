@@ -24,22 +24,6 @@ public class ImportOption
 
     }
     
-    // /// <summary>
-    // /// Import From FileStream
-    // /// </summary>
-    // /// <param name="file"></param>
-    // /// <exception cref="Exceptions.FileNotFoundException"></exception>
-    // public static ImportOption ImportFrom(FileStream file)
-    // {
-    //     if (file is not {Length: > 0}) 
-    //         throw new EmptyFileException("No data contained in the file");
-    //     
-    //     using var memoryStream = new MemoryStream();
-    //     file.CopyToAsync(memoryStream).Wait();
-    //     return new ImportOption(memoryStream);
-    //
-    // }
-    
     /// <summary>
     /// Import From Stream
     /// </summary>

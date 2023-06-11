@@ -1,61 +1,88 @@
-**EasyOffice.EasyExcel**
-------------------------
-
-Basic Excel Generation Library for .NET Core 7.0+ and .NET Framework 4.8+ using NPOI Library.
+# EasyOffice.EasyExcel
 
 
-Usage
------
+Basic Excel Export and Import Library for .NET Core 7.0+ using NPOI Library.
+
+
+## Usage
+
+>Model is used for export and import data from excel. Maintain property names as same as excel 
+ column name or use **HeaderName** attribute for mapping excel column with model property.
+> Make sure to keep properties as public and have getter and setter.
 
 ```csharp
-
-// FileGenerateModel
-
-public class FileGenerateModel
+// Model
+public class TObject
 {
-    public FileGenerateModel(string fileName)
+    [HeaderName("Id")] // HeaderName attribute is optional
+    public string Column1 { get; set; }
+    public string Name { get; set; }
+}
+
+```
+
+### Excel Export
+
+```csharp
+// FileGenerateData
+
+public class FileGenerateData
+{
+    public FileGenerateData(string fileName)
     {
         FileName = fileName;
         Stream = new MemoryStream();
     }
-    public MemoryStream Stream { get; set; }
-    public string FileName { get; set; }
+    public MemoryStream Stream { get;}
+    public string FileName { get;}
 }
-
-```
-
-```csharp
-// Model class for exporting excel file
-public class TObject
-{
-    [HeaderName("Id")]
-    public string Column1 { get; set; }
-    [HeaderName("Name")]
-    public string Column2 { get; set; }
-}
-
 ```
 
 ```csharp
 // Save to provided directory and return FilePath
-string filePath = ExcelGenerat<TObject>.GenerateExcel("SheetName",new List<TObject>())
+string filePath = ExcelExport<TObject>.GenerateExcel("SheetName",new List<TObject>())
         .ExportIntoDirectory("FileName","DirectoryPath");
+
+// Returns instance of FileGenerateData
+FileGenerateData data = ExcelExport<TObject>.GenerateExcel("SheetName",new List<TObject>())
+        .ExportAsStream("FileName");
 ```
 
 ```csharp
-// Returns instance of FileGenerateModel
-FileGenerateModel model = ExcelGenerat<TObject>.GenerateExcel("SheetName",new List<TObject>())
-        .ExportAsStream("FileName");
-    
 // Controller Level
 [HttpPost("excel-export"), DisableRequestSizeLimit]
 public IActionResult ExportExcel()
 {
-    FileGenerateModel model = ExcelGenerate<TObject>.GenerateExcel("SheetName",new List<TObject>())
+    FileGenerateData data = ExcelExport<TObject>.GenerateExcel("SheetName",new List<TObject>())
             .ExportAsStream("FileName");
     return File(model.Stream.ToArray(),ExportConst.ContentType, model.FileName);
 }
 
-
 ```
 
+---
+### Excel Import
+
+By using ImportOption.ImportFrom() method you can import excel data from File Path,IFormFile or Stream.
+
+```csharp
+// ImportOption
+ImportOption importOption = ImportOption.ImportFrom("FilePath");
+ImportOption importOption = ImportOption.ImportFrom(file);
+ImportOption importOption = ImportOption.ImportFrom(new Stream());
+```
+
+**ReadExcel or ReadExcelInSafe**
+
+These methods are the primary methods for importing data from excel. Both methods return List of TObject.
+
+> **ReadExcel** - Read xlsx file and map data to List of TObject. Throws _InvalidValueException_ exception when try to map blank value in excel to not nullable property
+
+> **ReadExcelInSafe** - This is more safe way of read and map data to List of TObject. Set default value when try to map blank value in excel to not nullable property.
+```csharp
+// ReadExcel
+List<TObject> data = ExcelImport<TObject>.ReadExcel(ImportOption.ImportFrom(filePath), "SheetName");
+
+// // ReadExcelInSafe
+List<TObject> data = ExcelImport<TObject>.ReadExcelInSafe(ImportOption.ImportFrom(filePath), "SheetName");
+```
